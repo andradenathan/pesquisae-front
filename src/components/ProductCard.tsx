@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, ShoppingCart } from "lucide-react";
 
@@ -21,19 +20,21 @@ export function ProductCard({
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="aspect-square overflow-hidden">
-        <img
-          src={image}
-          alt={name}
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-        />
+        <a href="#">
+          <img
+            src={image}
+            alt={name}
+            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+        </a>
       </div>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg line-clamp-2">{name}</CardTitle>
           {source === "amazon" ? (
-            <ShoppingBag className="h-5 w-5 text-orange-500" />
+            <img width="50" height="50" src="/amazon.jpg" />
           ) : (
-            <ShoppingCart className="h-5 w-5 text-yellow-500" />
+            <img width="50" height="50" src="/mercado-livre.png" />
           )}
         </div>
       </CardHeader>
