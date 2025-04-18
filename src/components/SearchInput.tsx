@@ -50,15 +50,26 @@ export function SearchInput({ onSearch }: SearchInputProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    // Open popover when there's input and search history exists
-    if (e.target.value.length > 0 && searchHistory.length > 0) {
-      setOpen(true);
+    // Only open popover when user has stopped typing for a moment
+    if (searchHistory.length > 0) {
+      setOpen(false); // Close popup when typing to avoid blocking input
     }
   };
 
   const handleFocus = () => {
+    // Only open history if there's actual history
     if (searchHistory.length > 0) {
       setOpen(true);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Check if the new focus target is within our component before closing
+    // This prevents the popover from closing when clicking inside it
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (!relatedTarget || !relatedTarget.closest('.search-history-popover')) {
+      // Add a small delay to allow for clicking items in the popover
+      setTimeout(() => setOpen(false), 200);
     }
   };
 
@@ -73,12 +84,16 @@ export function SearchInput({ onSearch }: SearchInputProps) {
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               onFocus={handleFocus}
+              onBlur={handleBlur}
               className="h-12 text-lg w-full"
             />
           </div>
         </PopoverTrigger>
         {searchHistory.length > 0 && (
-          <PopoverContent className="w-[400px] p-0" align="start">
+          <PopoverContent 
+            className="w-[400px] p-0 search-history-popover" 
+            align="start"
+          >
             <Command>
               <CommandList>
                 <CommandGroup heading="Histórico de pesquisas">
