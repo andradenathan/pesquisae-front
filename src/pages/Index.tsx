@@ -1,13 +1,47 @@
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SearchInput } from "@/components/SearchInput";
+import { ProductCard } from "@/components/ProductCard";
+
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  image?: string;
+  source?: "amazon" | "mercadolivre";
+}
 
 const Index = () => {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
 
   const handleSearch = (query: string) => {
     console.log("Pesquisando por:", query);
-    setSearchResults([{ id: 1, name: "Produto Teste", price: "R$ 99,99" }]);
+    setSearchResults([
+      {
+        id: 1,
+        name: "Smartphone Galaxy S24 Ultra",
+        price: "R$ 8.999,00",
+        image:
+          "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=300&fit=crop",
+        source: "amazon",
+      },
+      {
+        id: 2,
+        name: "Notebook ProBook Elite i7",
+        price: "R$ 5.499,00",
+        image:
+          "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=300&fit=crop",
+        source: "mercadolivre",
+      },
+      {
+        id: 3,
+        name: "iPad Pro M2 11 polegadas",
+        price: "R$ 7.299,00",
+        image:
+          "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=300&fit=crop",
+        source: "amazon",
+      },
+    ]);
   };
 
   return (
@@ -18,19 +52,20 @@ const Index = () => {
           <SearchInput onSearch={handleSearch} />
 
           {searchResults.length > 0 && (
-            <div className="w-full max-w-2xl mt-8">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">
-                  Resultados da pesquisa
-                </h2>
+            <div className="w-full mt-8">
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                Resultados da pesquisa
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {searchResults.map((product) => (
-                  <div
+                  <ProductCard
                     key={product.id}
-                    className="border-b border-gray-200 py-4 last:border-0"
-                  >
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-gray-600">{product.price}</p>
-                  </div>
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    image={product.image}
+                    source={product.source}
+                  />
                 ))}
               </div>
             </div>

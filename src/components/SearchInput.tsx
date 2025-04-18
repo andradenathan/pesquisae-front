@@ -4,9 +4,7 @@ import { Search } from "lucide-react";
 import { useState, KeyboardEvent } from "react";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -48,15 +46,26 @@ export function SearchInput({ onSearch }: SearchInputProps) {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    if (e.target.value.length > 0 && searchHistory.length > 0) {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+
+    if (newValue.length === 0 && searchHistory.length > 0) {
       setOpen(true);
+    } else {
+      setOpen(false);
     }
   };
 
   const handleFocus = () => {
-    if (searchHistory.length > 0) {
+    if (searchHistory.length > 0 && inputValue.length === 0) {
       setOpen(true);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (!relatedTarget || !relatedTarget.closest(".search-history-popover")) {
+      setTimeout(() => setOpen(false), 200);
     }
   };
 
@@ -71,12 +80,16 @@ export function SearchInput({ onSearch }: SearchInputProps) {
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               onFocus={handleFocus}
+              onBlur={handleBlur}
               className="h-12 text-lg w-full"
             />
           </div>
         </PopoverTrigger>
         {searchHistory.length > 0 && (
-          <PopoverContent className="w-[400px] p-0" align="start">
+          <PopoverContent
+            className="w-[400px] p-0 search-history-popover"
+            align="start"
+          >
             <Command>
               <CommandList>
                 <CommandGroup heading="Histórico de pesquisas">
