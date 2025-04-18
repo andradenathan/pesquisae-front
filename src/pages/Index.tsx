@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SearchInput } from "@/components/SearchInput";
@@ -7,12 +6,8 @@ const Index = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const handleSearch = (query: string) => {
-    // Aqui você pode implementar a lógica de busca dos produtos
     console.log("Pesquisando por:", query);
-    // Por enquanto apenas simularemos alguns resultados
-    setSearchResults([
-      { id: 1, name: "Produto Teste", price: "R$ 99,99" },
-    ]);
+    setSearchResults([{ id: 1, name: "Produto Teste", price: "R$ 99,99" }]);
   };
 
   return (
@@ -21,11 +16,13 @@ const Index = () => {
         <div className="flex flex-col items-center justify-center space-y-8">
           <Logo />
           <SearchInput onSearch={handleSearch} />
-          
+
           {searchResults.length > 0 && (
             <div className="w-full max-w-2xl mt-8">
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Resultados da pesquisa</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                  Resultados da pesquisa
+                </h2>
                 {searchResults.map((product) => (
                   <div
                     key={product.id}

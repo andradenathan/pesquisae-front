@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -50,7 +49,6 @@ export function SearchInput({ onSearch }: SearchInputProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    // Open popover when there's input and search history exists
     if (e.target.value.length > 0 && searchHistory.length > 0) {
       setOpen(true);
     }
@@ -97,7 +95,7 @@ export function SearchInput({ onSearch }: SearchInputProps) {
           </PopoverContent>
         )}
       </Popover>
-      <Button 
+      <Button
         onClick={handleSearch}
         size="lg"
         className="h-12 px-8 bg-purple-600 hover:bg-purple-700"

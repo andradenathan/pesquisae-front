@@ -1,4 +1,3 @@
-
 export function Logo() {
   return (
     <div className="text-center mb-8">
@@ -6,7 +5,7 @@ export function Logo() {
         Pesquisaê
       </h1>
       <p className="text-gray-500 mt-2">
-        Encontre todos os dados dos seus produtos
+        Busque por produtos e encontre as melhores ofertas
       </p>
     </div>
   );
