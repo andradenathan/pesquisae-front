@@ -32,6 +32,7 @@ export function SearchInput({ onSearch }: SearchInputProps) {
       if (!searchHistory.includes(inputValue)) {
         setSearchHistory((prev) => [inputValue, ...prev].slice(0, 5));
       }
+      setOpen(false);
     }
   };
 
@@ -47,17 +48,26 @@ export function SearchInput({ onSearch }: SearchInputProps) {
     onSearch(value);
   };
 
+  const handleFocus = () => {
+    if (searchHistory.length > 0) {
+      setOpen(true);
+    }
+  };
+
   return (
     <div className="flex w-full max-w-xl gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Input
-            placeholder="Pesquisar produtos..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="h-12 text-lg"
-          />
+          <div className="relative flex-1">
+            <Input
+              placeholder="Pesquisar produtos..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              onFocus={handleFocus}
+              className="h-12 text-lg w-full"
+            />
+          </div>
         </PopoverTrigger>
         {searchHistory.length > 0 && (
           <PopoverContent className="w-[400px] p-0" align="start">
