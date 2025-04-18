@@ -48,6 +48,14 @@ export function SearchInput({ onSearch }: SearchInputProps) {
     onSearch(value);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    // Open popover when there's input and search history exists
+    if (e.target.value.length > 0 && searchHistory.length > 0) {
+      setOpen(true);
+    }
+  };
+
   const handleFocus = () => {
     if (searchHistory.length > 0) {
       setOpen(true);
@@ -62,7 +70,7 @@ export function SearchInput({ onSearch }: SearchInputProps) {
             <Input
               placeholder="Pesquisar produtos..."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               onFocus={handleFocus}
               className="h-12 text-lg w-full"
