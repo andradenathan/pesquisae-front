@@ -49,23 +49,26 @@ export function SearchInput({ onSearch }: SearchInputProps) {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    // Only open popover when user has stopped typing for a moment
-    if (searchHistory.length > 0) {
-      setOpen(false); // Close popup when typing to avoid blocking input
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    
+    // Only show history when input is empty
+    if (newValue.length === 0 && searchHistory.length > 0) {
+      setOpen(true);
+    } else {
+      setOpen(false);
     }
   };
 
   const handleFocus = () => {
-    // Only open history if there's actual history
-    if (searchHistory.length > 0) {
+    // Only open history if there's actual history AND input is empty
+    if (searchHistory.length > 0 && inputValue.length === 0) {
       setOpen(true);
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // Check if the new focus target is within our component before closing
-    // This prevents the popover from closing when clicking inside it
     const relatedTarget = e.relatedTarget as HTMLElement;
     if (!relatedTarget || !relatedTarget.closest('.search-history-popover')) {
       // Add a small delay to allow for clicking items in the popover
