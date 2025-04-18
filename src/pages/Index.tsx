@@ -1,47 +1,17 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SearchInput } from "@/components/SearchInput";
 import { ProductCard } from "@/components/ProductCard";
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  image?: string;
-  source?: "amazon" | "mercadolivre";
-}
+import { CapturarProdutoDTO } from "@/types/Product";
+import { getProducts } from "@/api/products";
 
 const Index = () => {
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const idPrefix = useId();
+  const [searchResults, setSearchResults] = useState<CapturarProdutoDTO[]>([]);
 
-  const handleSearch = (query: string) => {
-    console.log("Pesquisando por:", query);
-    setSearchResults([
-      {
-        id: 1,
-        name: "Smartphone Galaxy S24 Ultra",
-        price: "R$ 8.999,00",
-        image:
-          "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=300&fit=crop",
-        source: "amazon",
-      },
-      {
-        id: 2,
-        name: "Notebook ProBook Elite i7",
-        price: "R$ 5.499,00",
-        image:
-          "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=300&fit=crop",
-        source: "mercadolivre",
-      },
-      {
-        id: 3,
-        name: "iPad Pro M2 11 polegadas",
-        price: "R$ 7.299,00",
-        image:
-          "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=300&fit=crop",
-        source: "amazon",
-      },
-    ]);
+  const handleSearch = async (query: string) => {
+    const response = await getProducts(query);
+    setSearchResults(response.data.produtos);
   };
 
   return (
@@ -54,17 +24,18 @@ const Index = () => {
           {searchResults.length > 0 && (
             <div className="w-full mt-8">
               <h2 className="text-2xl font-bold mb-6 text-center">
-                Resultados da pesquisa
+                Resultados da pesquisa (exibindo {searchResults.length + " "}
+                produtos)
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {searchResults.map((product) => (
                   <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    image={product.image}
-                    source={product.source}
+                    key={`${idPrefix}-${product.nome}`}
+                    nome={product.nome}
+                    preco={product.preco}
+                    imageUrl={product.imageUrl}
+                    link={product.link}
+                    marketplace={product.marketplace}
                   />
                 ))}
               </div>
