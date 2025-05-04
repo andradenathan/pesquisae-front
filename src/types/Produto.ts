@@ -1,6 +1,7 @@
 export interface BuscarProdutosResultadoDTO {
   produtos: CapturarProdutoDTO[];
   total: number;
+  totalDePaginas: number;
 }
 
 export interface CapturarProdutoDTO {

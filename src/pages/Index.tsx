@@ -1,45 +1,53 @@
-import { useId, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { SearchInput } from "@/components/SearchInput";
-import { ProductCard } from "@/components/ProductCard";
-import { CapturarProdutoDTO } from "@/types/Product";
-import { getProducts } from "@/api/products";
+import { SearchResults } from "@/components/SearchResults";
+import { useProductSearch } from "@/hooks/use-product-search";
+import { X } from "lucide-react";
 
 const Index = () => {
-  const idPrefix = useId();
-  const [searchResults, setSearchResults] = useState<CapturarProdutoDTO[]>([]);
+  const {
+    data: respostaApi,
+    buscarProdutos,
+    mudarPagina,
+    resetarBusca,
+    isLoading,
+    error,
+    queryAtual,
+    paginaAtual,
+  } = useProductSearch();
 
-  const handleSearch = async (query: string) => {
-    const response = await getProducts(query);
-    setSearchResults(response.data.produtos);
-  };
+  const shouldShowResults =
+    isLoading || error !== null || (respostaApi !== null && queryAtual !== "");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center justify-center space-y-8">
           <Logo />
-          <SearchInput onSearch={handleSearch} />
+          <div className="w-full max-w-xl flex flex-col items-center space-y-4">
+            {" "}
+            <SearchInput onSearch={buscarProdutos} disabled={isLoading} />
+            {!isLoading && queryAtual && (
+              <button
+                type="button"
+                onClick={resetarBusca}
+                className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition ease-in-out duration-150"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Limpar Busca ({queryAtual})
+              </button>
+            )}
+          </div>
 
-          {searchResults.length > 0 && (
-            <div className="w-full mt-8">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                Resultados da pesquisa (exibindo {searchResults.length + " "}
-                produtos)
-              </h2>
-              <div className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((product) => (
-                  <ProductCard
-                    key={`${idPrefix}-${product.nome}`}
-                    nome={product.nome}
-                    preco={product.preco}
-                    imageUrl={product.imageUrl}
-                    link={product.link}
-                    marketplace={product.marketplace}
-                  />
-                ))}
-              </div>
-            </div>
+          {shouldShowResults && (
+            <SearchResults
+              isLoading={isLoading}
+              error={error}
+              respostaApi={respostaApi}
+              query={queryAtual}
+              paginaAtual={paginaAtual}
+              onMudarPagina={mudarPagina}
+            />
           )}
         </div>
       </div>

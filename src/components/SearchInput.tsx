@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { useState, KeyboardEvent } from "react";
+import { Search, History } from "lucide-react";
+import { useState, KeyboardEvent, useRef } from "react";
+import { cn } from "@/lib/utils";
 import {
   Command,
   CommandGroup,
@@ -16,90 +17,135 @@ import {
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
+  disabled: boolean;
 }
 
-export function SearchInput({ onSearch }: SearchInputProps) {
-  const [open, setOpen] = useState(false);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState("");
+const STORAGE_CHAVE_HISTORICO = "@pesquisae/historico";
+const MAX_ITENS_HISTORICO = 8;
+
+export function SearchInput({ onSearch, disabled }: SearchInputProps) {
+  const [estaAberto, setEstaAberto] = useState(false);
+  const [historicoDeBusca, setHistoricoDeBusca] = useState<string[]>(() => {
+    try {
+      const historicoArmazenado = localStorage.getItem(STORAGE_CHAVE_HISTORICO);
+      if (historicoArmazenado) {
+        const historicoParseado = JSON.parse(historicoArmazenado);
+
+        if (
+          Array.isArray(historicoParseado) &&
+          historicoParseado.every((item) => typeof item === "string")
+        ) {
+          return historicoParseado.slice(0, MAX_ITENS_HISTORICO);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Falha ao carregar histórico de busca do localStorage:",
+        error
+      );
+    }
+    return [];
+  });
+
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = () => {
-    if (inputValue.trim()) {
-      onSearch(inputValue);
-      if (!searchHistory.includes(inputValue)) {
-        setSearchHistory((prev) => [inputValue, ...prev].slice(0, 5));
+    const valorTruncado = query.trim();
+    if (valorTruncado) {
+      onSearch(valorTruncado);
+
+      if (!historicoDeBusca.includes(valorTruncado)) {
+        const novoHistorico = [valorTruncado, ...historicoDeBusca].slice(
+          0,
+          MAX_ITENS_HISTORICO
+        );
+
+        setHistoricoDeBusca(novoHistorico);
+
+        try {
+          localStorage.setItem(
+            STORAGE_CHAVE_HISTORICO,
+            JSON.stringify(novoHistorico)
+          );
+        } catch (error) {
+          console.error(
+            "Falha ao salvar histórico de busca no localStorage:",
+            error
+          );
+        }
       }
-      setOpen(false);
+      setEstaAberto(false);
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !disabled) {
       handleSearch();
     }
   };
 
   const handleHistorySelect = (value: string) => {
-    setInputValue(value);
-    setOpen(false);
+    setQuery(value);
+    setEstaAberto(false);
     onSearch(value);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+    const novaQuery = e.target.value;
+    setQuery(novaQuery);
 
-    if (newValue.length === 0 && searchHistory.length > 0) {
-      setOpen(true);
+    if (novaQuery.length === 0 && historicoDeBusca.length > 0) {
+      setEstaAberto(true);
     } else {
-      setOpen(false);
+      setEstaAberto(false);
     }
   };
 
   const handleFocus = () => {
-    if (searchHistory.length > 0 && inputValue.length === 0) {
-      setOpen(true);
-    }
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const relatedTarget = e.relatedTarget as HTMLElement;
-    if (!relatedTarget || !relatedTarget.closest(".search-history-popover")) {
-      setTimeout(() => setOpen(false), 200);
+    if (historicoDeBusca.length > 0 && query.length === 0) {
+      setEstaAberto(true);
     }
   };
 
   return (
-    <div className="flex w-full max-w-xl gap-2">
-      <Popover open={open} onOpenChange={setOpen}>
+    <div className="flex w-full max-w-xl gap-2 items-center">
+      <Popover open={estaAberto} onOpenChange={setEstaAberto}>
         <PopoverTrigger asChild>
           <div className="relative flex-1">
             <Input
+              ref={inputRef}
               placeholder="Pesquisar produtos..."
-              value={inputValue}
+              value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               onFocus={handleFocus}
-              onBlur={handleBlur}
               className="h-12 text-lg w-full"
+              disabled={disabled}
+              aria-haspopup="listbox"
+              aria-expanded={estaAberto}
             />
+            <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           </div>
         </PopoverTrigger>
-        {searchHistory.length > 0 && (
+        {historicoDeBusca.length > 0 && (
           <PopoverContent
-            className="w-[400px] p-0 search-history-popover"
+            className="w-[--radix-popover-trigger-width] p-0"
             align="start"
+            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <Command>
               <CommandList>
                 <CommandGroup heading="Histórico de pesquisas">
-                  {searchHistory.map((item) => (
+                  {historicoDeBusca.map((item) => (
                     <CommandItem
                       key={item}
+                      value={item}
                       onSelect={() => handleHistorySelect(item)}
+                      className="cursor-pointer"
                     >
-                      <Search className="mr-2 h-4 w-4" />
-                      {item}
+                      <History className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span className="hover:text-purple-600">{item}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -111,9 +157,14 @@ export function SearchInput({ onSearch }: SearchInputProps) {
       <Button
         onClick={handleSearch}
         size="lg"
-        className="h-12 px-8 bg-purple-600 hover:bg-purple-700"
+        className={cn(
+          "h-12 px-6 bg-purple-600 hover:bg-purple-700",
+          "disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+        disabled={disabled || !query.trim()}
+        aria-label="Pesquisar"
       >
-        <Search className="h-5 w-5" />
+        Buscar
       </Button>
     </div>
   );
