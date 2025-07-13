@@ -12,6 +12,4 @@ O projeto utiliza técnicas de web scraping para coletar informações de difere
 - React
 
 ## Instalação
-- 
-
-Acesse o site em https://pesquisae.net
+- npm install
